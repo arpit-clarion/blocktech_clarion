@@ -5,7 +5,7 @@ class HistoryRecordsController < ApplicationController
   # GET /history_records
   # GET /history_records.json
   def index
-    @history_records = HistoryRecord.all
+    @history_records = HistoryRecord.all.includes(:historian)
   end
 
   # GET /history_records/1
@@ -27,6 +27,7 @@ class HistoryRecordsController < ApplicationController
   def create
     @history_record = HistoryRecord.new(history_record_params)
     @history_record.send_to_florincoin
+    @history_record.update_schedule_status
     if @history_record.save
       redirect_to @history_record, notice: 'History record was successfully created.'
     else
@@ -38,6 +39,7 @@ class HistoryRecordsController < ApplicationController
   # PATCH/PUT /history_records/1.json
   def update
     if @history_record.update(history_record_params)
+      @history_record.update_schedule_status
       redirect_to @history_record, notice: 'History record was successfully updated.'
     else
       render :edit
@@ -53,9 +55,11 @@ class HistoryRecordsController < ApplicationController
 
   ## GET /send_data_points
   ## GET /history_records/1.json
-  def send_data_points  
-    @history_record.send_to_florincoin(true)
-    redirect_to @history_record, notice: 'Data points sent successfully.'
+  ### Start and Stop scheduler ##
+  def send_data_points
+    @history_record.update(history_record_params)
+    @history_record.update_schedule_status
+    redirect_to history_records_path, notice: "Scheduler #{params[:status]} for scheduled rate."
   end
 
   private
@@ -66,6 +70,6 @@ class HistoryRecordsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def history_record_params
-      params.require(:history_record).permit(:title, :http_api_address, :fields_to_store, :rate, :public, :historian_id)
+      params.require(:history_record).permit(:title, :http_api_address, :fields_to_store, :rate, :public, :historian_id, :scheduled_date, :schedule_status)
     end
 end

@@ -1,0 +1,15 @@
+%p#notice= notice
+
+%p
+  %b Txn:
+  = @hr_data_point.txn_id
+%p
+  %b History record:
+  = @hr_data_point.history_record_id
+%p
+  %b Data points:
+  = @hr_data_point.data_points
+
+= link_to 'Edit', edit_hr_data_point_path(@hr_data_point)
+\|
+= link_to 'Back', hr_data_points_path

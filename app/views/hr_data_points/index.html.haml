@@ -1,0 +1,25 @@
+%h1 Listing hr_data_points
+
+%table
+  %thead
+    %tr
+      %th Txn
+      %th History record
+      %th Data points
+      %th
+      %th
+      %th
+
+  %tbody
+    - @hr_data_points.each do |hr_data_point|
+      %tr
+        %td= hr_data_point.txn_id
+        %td= hr_data_point.history_record_id
+        %td= hr_data_point.data_points
+        %td= link_to 'Show', hr_data_point
+        %td= link_to 'Edit', edit_hr_data_point_path(hr_data_point)
+        %td= link_to 'Destroy', hr_data_point, :method => :delete, :data => { :confirm => 'Are you sure?' }
+
+%br
+
+= link_to 'New Hr data point', new_hr_data_point_path

@@ -28,8 +28,11 @@
   .control-group
     = f.label :rate, :class => 'control-label'
     .controls
-      = f.text_field :rate, :class => 'form-control'
+      =# f.text_field :rate, :class => 'form-control'
+      = f.collection_select :rate, HistoryRecord::RATES,:first,:last, prompt: "Select Rate", :class => 'form-control'
     = error_span(@history_record[:rate])
+  .control-group
+    = error_span(@history_record[:public])
   .control-group
     = f.label :public, :class => 'control-label'
     .controls

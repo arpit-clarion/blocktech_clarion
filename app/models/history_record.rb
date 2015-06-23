@@ -1,16 +1,17 @@
 class HistoryRecord < ActiveRecord::Base
+
+  ### Constants ###
+  RATES = { '5m' => '5 Minutes', '10m' => '10 Minutes', '15m' => '15 Minutes', '30m'=> '30 Minutes', '1h'=> '1 Hour' }
+  ####
+
   ### Associations ###
   belongs_to :historian
-  has_many :history_record_datapoints
+  has_many :hr_data_points
   #####
 
   ### Validations ###
   validates :title, :http_api_address, :fields_to_store, :rate, :public, presence: true
-  validates :txn_id, uniqueness: true
-  ####
-
-  ### Callbacks ###
-  before_save :save_data_fields
+  validates :txn_id, uniqueness: true ,allow_blank: true
   ####
 
   # serialize field is for data points on the header for history records
@@ -27,7 +28,8 @@ class HistoryRecord < ActiveRecord::Base
         self.txn_id = send_message(florincoin_client, historian, tx_comment)
       else
         tx_comment = get_hr_data_point_tx_comment(historian, signature)
-        self.data_point_txn_id = send_message(florincoin_client, historian, tx_comment)
+        data_point_txn_id = send_message(florincoin_client, historian, tx_comment)
+        self.save_data_fields(data_point_txn_id)
       end
     end
     errors.add(:txn_id, 'Transaction is not generated.') if self.txn_id.blank?
@@ -62,15 +64,32 @@ class HistoryRecord < ActiveRecord::Base
     }.to_json
   end
 
-  private
+  # This will find all the schedueled hisrory records and run RPC accordingly
+  def self.call_schedueled_rpc
+    schedules = self.where(schedule_status: true).where(scheduled_date: Time.now..Time.now - 5.minutes)
+    puts "schedules #{schedules.inspect}"
+  end
 
-    # This method will save the fields from the history revcord form
-    def save_data_fields
-      data_fields = FlorincoinRPC.new(self.http_api_address)
-      data_points = data_fields.get_data
-      self.data_points =  data_points
+  # If Schedule status is false Means schedual will be stoped and date will be removed
+  # If Schedule status is true that means it will keep on updating date from cron job
+  def update_schedule_status
+    ### if job is present unschedule it and create new job ###
+    jobs = $scheduler.jobs(:tag => self.id)
+    $scheduler.unschedule(jobs.first.id) if jobs.present?
+    ### schedule job wehn schedule status is true ###
+    if schedule_status
+      $scheduler.every rate, :tags => "#{self.id}" do
+        self.send_to_florincoin(true)
+      end
     end
+  end
 
+  ### Save data points inside HrDataPoints ###
+  def save_data_fields(txn_id=nil)
+    data_fields = FlorincoinRPC.new(self.http_api_address)
+    data_points = data_fields.get_data
+    self.hr_data_points.create(data_points: data_points, txn_id: txn_id)
+  end
 end
 
 

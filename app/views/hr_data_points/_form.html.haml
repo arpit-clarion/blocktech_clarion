@@ -1,0 +1,19 @@
+= form_for @hr_data_point do |f|
+  - if @hr_data_point.errors.any?
+    #error_explanation
+      %h2= "#{pluralize(@hr_data_point.errors.count, "error")} prohibited this hr_data_point from being saved:"
+      %ul
+        - @hr_data_point.errors.full_messages.each do |msg|
+          %li= msg
+
+  .field
+    = f.label :txn_id
+    = f.text_field :txn_id
+  .field
+    = f.label :history_record_id
+    = f.number_field :history_record_id
+  .field
+    = f.label :data_points
+    = f.text_area :data_points
+  .actions
+    = f.submit 'Save'

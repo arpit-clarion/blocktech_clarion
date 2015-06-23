@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :hr_data_points
   resources :history_records
   resources :historians
   get 'send_data_points/:id' => 'history_records#send_data_points', as: :send_data_points
@@ -7,7 +8,6 @@ Rails.application.routes.draw do
 
   # You can have the root of your site routed with "root"
   root 'historians#index'
-
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 
@@ -57,3 +57,4 @@ Rails.application.routes.draw do
   #     resources :products
   #   end
 end
+
