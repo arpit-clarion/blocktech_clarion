@@ -23,14 +23,6 @@ ActiveRecord::Schema.define(version: 20150623050355) do
     t.text     "txn_id"
   end
 
-  create_table "history_record_datapoints", force: :cascade do |t|
-    t.integer  "history_record_id"
-    t.string   "dp_field"
-    t.string   "dp_value"
-    t.datetime "created_at",        null: false
-    t.datetime "updated_at",        null: false
-  end
-
   create_table "history_records", force: :cascade do |t|
     t.text     "title"
     t.text     "http_api_address"
