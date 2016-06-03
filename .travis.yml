@@ -8,5 +8,5 @@ script:
   - bundle exec rake db:test:prepare
   - bundle exec rspec spec/
 before_script:
-  - mysql -e 'create database myapp_test'
+  - mysql -e 'create database myapp_test' -u travis -p 
 bundler_args: --binstubs=./bundler_stubs
