@@ -29,14 +29,17 @@ class HistoryRecord < ActiveRecord::Base
       else
         dp = self.save_data_fields()
         # Data points will be sent if they are available
-        if dp.present?
-          data_to_send = dp.data_points.except("timestamp")
+        if dp.present? && dp.data_points.present?
+          ### This should send field define in "Field To store" ###
+          data_to_send = refject_data_ppoints(dp.data_points)
+
           # This will set the tx_comment
           tx_comment = get_hr_data_point_tx_comment(historian, signature, data_to_send)
           # This will send the tx comment to florin coin and get the datapoint txn id
           data_point_txn_id = send_message(florincoin_client, historian, tx_comment)
           # This will save the data_point_txn_id to data points
           dp.update(txn_id: data_point_txn_id)
+
         end
       end
     end
@@ -91,6 +94,13 @@ class HistoryRecord < ActiveRecord::Base
     end
   end
 
+  ### Only allow fields which is inside history record field_to_store field ###
+  def refject_data_ppoints(dp)
+    fields_to_store = self.fields_to_store.gsub(' ', "").split(",")
+    dp = dp.reject {|k,v|  fields_to_store.include?(k.lstrip)==false }
+    dp.except("timestamp")
+  end
+
   ### Save data points inside HrDataPoints ###
   def save_data_fields()
     data_fields = FlorincoinRPC.new(self.http_api_address)
@@ -98,5 +108,6 @@ class HistoryRecord < ActiveRecord::Base
     dp = self.hr_data_points.create(data_points: data_points)
   end
 end
+
 
 

@@ -27,7 +27,6 @@ class HistoryRecordsController < ApplicationController
   def create
     @history_record = HistoryRecord.new(history_record_params)
     @history_record.send_to_florincoin
-    @history_record.update_schedule_status
     if @history_record.save
       redirect_to @history_record, notice: 'History record was successfully created.'
     else
