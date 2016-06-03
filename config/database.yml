@@ -1,4 +1,4 @@
-default: &default
+  default: &default
   adapter: mysql2
   encoding: utf8
   # For details on connection pooling, see rails configuration guide
@@ -17,7 +17,9 @@ staging:
 
 test: &test
   <<: *default
-  database: blocktech_test
+  database: myapp_test
+  username: root
+  password:   
 
 production:
   <<: *default
